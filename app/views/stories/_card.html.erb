@@ -1,0 +1,35 @@
+<article class="overflow-hidden rounded-xl border border-olive/15 bg-white/70 shadow-sm transition hover:border-olive/30 hover:shadow">
+  <%= link_to story_path(story), class: "grid gap-0 sm:grid-cols-[11rem_1fr]" do %>
+    <div class="min-h-32 bg-olive-deep/90 sm:min-h-full">
+      <% if story.image_url.present? %>
+        <img src="<%= story.image_url %>" alt="" class="h-40 w-full object-cover sm:h-full" loading="lazy">
+      <% else %>
+        <div class="flex h-40 items-end p-4 sm:h-full">
+          <span class="font-display text-parchment/80 text-lg leading-snug"><%= story.source_name %></span>
+        </div>
+      <% end %>
+    </div>
+    <div class="flex flex-col gap-3 p-5">
+      <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-ink/55">
+        <span><%= story.source_name %></span>
+        <span aria-hidden="true">·</span>
+        <time datetime="<%= (story.published_at || story.created_at)&.iso8601 %>"><%= story_timestamp(story) %></time>
+      </div>
+      <h2 class="font-display text-2xl leading-snug text-olive-deep"><%= story.title %></h2>
+      <% if story.biblical_analysis %>
+        <div class="flex flex-wrap gap-1.5">
+          <% story.biblical_analysis.theme_list.each do |theme| %>
+            <%= theme_chip(theme) %>
+          <% end %>
+          <% if story.biblical_analysis.stretch? %>
+            <%= theme_chip("stretch") %>
+          <% end %>
+        </div>
+        <p class="text-sm leading-relaxed text-ink/80"><%= story.biblical_analysis.summary.truncate(220) %></p>
+      <% else %>
+        <p class="text-sm leading-relaxed text-ink/70"><%= story.excerpt %></p>
+      <% end %>
+      <span class="text-sm font-medium text-olive">Read the analysis →</span>
+    </div>
+  <% end %>
+</article>

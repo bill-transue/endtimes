@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: Palatino, "Palatino Linotype", "Iowan Old Style", "Book Antiqua", Georgia, serif;
+  --font-sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --color-parchment: #f3eadc;
+  --color-ink: #1c1712;
+  --color-olive: #2f3b2c;
+  --color-olive-deep: #1f281d;
+  --color-gold: #8b6a2f;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-parchment);
+  color: var(--color-ink);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}

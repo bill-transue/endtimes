@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for(:title) ? "#{content_for(:title)} · End Times" : "End Times · News read through Scripture" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="<%= content_for(:meta_description) || 'A Biblical news reader that links out to original reporting and adds original analysis of sin, justice, hope, and prophecy.' %>">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="End Times">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body class="min-h-screen flex flex-col bg-parchment text-ink antialiased">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-white focus:px-3 focus:py-2">Skip to content</a>
+    <header class="bg-olive-deep text-parchment">
+      <div class="mx-auto flex max-w-5xl flex-wrap items-baseline justify-between gap-4 px-4 py-5 sm:px-6">
+        <div>
+          <p class="font-display text-2xl tracking-wide">
+            <%= link_to "End Times", root_path, class: "hover:text-white" %>
+          </p>
+          <p class="mt-1 max-w-md text-sm text-parchment/75">News read through Scripture — not a prophecy decoder.</p>
+        </div>
+        <nav class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+          <%= link_to "Feed", root_path, class: "hover:text-white" %>
+          <%= link_to "About", about_path, class: "hover:text-white" %>
+          <%= link_to "Admin", admin_stories_path, class: "text-parchment/70 hover:text-white" %>
+        </nav>
+      </div>
+    </header>
+
+    <% if flash.any? %>
+      <div class="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
+        <% flash.each do |type, message| %>
+          <p class="rounded-md border px-3 py-2 text-sm <%= flash_class(type) %>"><%= message %></p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <main id="main" class="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
+      <%= yield %>
+    </main>
+
+    <footer class="border-t border-olive/15 bg-olive-deep/5">
+      <div class="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-6 text-sm text-ink/70 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <p>We quote Scripture and link to publishers. We do not reprint full articles.</p>
+        <%= link_to "How the analysis works", about_path, class: "text-olive underline decoration-olive/30 underline-offset-4 hover:decoration-olive" %>
+      </div>
+    </footer>
+  </body>
+</html>

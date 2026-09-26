@@ -1,0 +1,26 @@
+<% content_for :title, "Feed" %>
+
+<div class="flex flex-col gap-8">
+  <header class="max-w-2xl">
+    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Public reader</p>
+    <h1 class="font-display mt-2 text-4xl leading-tight text-olive-deep sm:text-5xl">Today’s news, read as Scripture reads the world</h1>
+    <p class="mt-4 text-base leading-relaxed text-ink/80">
+      Each card is original Biblical analysis plus a link to the reporting. End times is one theme among others: sin, justice, mercy, and hope. Thin prophetic links are marked, not hidden.
+    </p>
+  </header>
+
+  <% if @stories.empty? %>
+    <div class="rounded-xl border border-dashed border-olive/25 bg-white/60 px-6 py-16 text-center">
+      <h2 class="font-display text-2xl text-olive-deep">No published stories yet</h2>
+      <p class="mx-auto mt-3 max-w-md text-ink/70">
+        Ingest runs about every twenty minutes. Until something is selected for the feed, this page stays empty on purpose. Editors can publish from admin.
+      </p>
+    </div>
+  <% else %>
+    <ol class="grid gap-5">
+      <% @stories.each do |story| %>
+        <li><%= render "stories/card", story: story %></li>
+      <% end %>
+    </ol>
+  <% end %>
+</div>

@@ -1,0 +1,70 @@
+# End Times on Render: one web process, one Solid Queue worker, one Postgres.
+# Set the documented secrets in the dashboard (sync: false means they are not in git).
+
+databases:
+  - name: end-times-db
+    plan: free
+    databaseName: end_times
+    user: end_times
+
+services:
+  - type: web
+    name: end-times-web
+    runtime: ruby
+    plan: free
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bin/rails server -b 0.0.0.0"
+    healthCheckPath: /up
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: end-times-db
+          property: connectionString
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: NEWS_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DAILY_PUBLISH_CAP
+        value: "10"
+
+  - type: worker
+    name: end-times-worker
+    runtime: ruby
+    plan: free
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bin/jobs"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: end-times-db
+          property: connectionString
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: NEWS_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DAILY_PUBLISH_CAP
+        value: "10"
