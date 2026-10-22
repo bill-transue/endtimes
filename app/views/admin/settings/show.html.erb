@@ -1,0 +1,90 @@
+<% content_for :title, "Editorial settings" %>
+
+<div class="flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Editors</p>
+      <h1 class="font-display mt-1 text-3xl text-olive-deep">Editorial settings</h1>
+      <p class="mt-2 max-w-xl text-sm text-ink/70">Choose what we fetch and what we promote. Saving reshuffles stories still waiting in the queue; nothing already published is taken down.</p>
+    </div>
+    <nav class="flex flex-wrap gap-2 text-sm">
+      <%= link_to "Story queue", admin_stories_path, class: "rounded-full border border-olive/20 bg-white/70 px-3 py-1 text-olive hover:border-olive/40" %>
+      <span class="rounded-full border border-olive bg-olive px-3 py-1 text-parchment">Settings</span>
+    </nav>
+  </header>
+
+  <%= form_with model: @setting, url: admin_settings_path, method: :patch, class: "flex flex-col gap-6 rounded-xl border border-olive/15 bg-white/80 p-6" do |form| %>
+    <% if @setting.errors.any? %>
+      <div class="rounded-md border border-rose-800/30 bg-rose-50 px-3 py-2 text-sm text-rose-950">
+        <% @setting.errors.full_messages.each do |message| %>
+          <p><%= message %></p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <fieldset class="flex flex-col gap-3">
+      <legend class="font-display text-xl text-olive-deep">Focus</legend>
+      <% EditorialSetting::FOCUS_LABELS.each_key do |focus| %>
+        <label class="flex items-start gap-3 rounded-lg border border-olive/15 p-3 hover:border-olive/40">
+          <%= form.radio_button :focus, focus, class: "mt-1" %>
+          <span>
+            <span class="font-medium text-olive-deep"><%= EditorialSetting::FOCUS_LABELS[focus] %></span>
+            <span class="block text-sm text-ink/70"><%= EditorialSetting::FOCUS_DESCRIPTIONS[focus] %></span>
+          </span>
+        </label>
+      <% end %>
+    </fieldset>
+
+    <div class="flex flex-col gap-2">
+      <%= form.label :gnews_queries_text, "GNews queries", class: "font-display text-xl text-olive-deep" %>
+      <p class="text-sm text-ink/70">One search per line. GNews supports <code>OR</code>, <code>AND</code>, <code>NOT</code>, and "quoted phrases". Leave empty to use the defaults for the chosen focus.</p>
+      <%= form.text_area :gnews_queries_text, rows: 7, class: "w-full rounded-md border border-olive/25 bg-white px-3 py-2 font-mono text-sm" %>
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2">
+      <div class="flex flex-col gap-2">
+        <%= form.label :min_prophecy_relevance, "Minimum prophecy relevance", class: "font-medium text-olive-deep" %>
+        <%= form.number_field :min_prophecy_relevance, step: 0.05, min: 0, max: 1, class: "w-32 rounded-md border border-olive/25 bg-white px-3 py-2 text-sm" %>
+        <p class="text-sm text-ink/70">0 to 1. A story counts as prophecy-relevant at or above this score (used for the end-times boost and the Mix daily floor).</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <%= form.label :daily_publish_cap, "Daily publish cap", class: "font-medium text-olive-deep" %>
+        <%= form.number_field :daily_publish_cap, min: 0, placeholder: EditorialSetting.default_daily_publish_cap, class: "w-32 rounded-md border border-olive/25 bg-white px-3 py-2 text-sm" %>
+        <p class="text-sm text-ink/70">Blank uses the server default (<%= EditorialSetting.default_daily_publish_cap %>).</p>
+      </div>
+    </div>
+
+    <div>
+      <%= form.submit "Save and reshuffle", class: "rounded-md bg-olive px-4 py-2 text-sm text-parchment hover:bg-olive-deep" %>
+    </div>
+  <% end %>
+
+  <section class="flex flex-col gap-3">
+    <h2 class="font-display text-xl text-olive-deep">RSS feeds</h2>
+    <div class="overflow-x-auto rounded-xl border border-olive/15 bg-white/80">
+      <table class="min-w-full text-left text-sm">
+        <thead class="border-b border-olive/10 bg-olive-deep text-parchment">
+          <tr>
+            <th class="px-3 py-2 font-medium">Feed</th>
+            <th class="px-3 py-2 font-medium">Status</th>
+            <th class="px-3 py-2 font-medium"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @feed_sources.each do |source| %>
+            <tr class="border-b border-olive/10 align-top">
+              <td class="px-3 py-3">
+                <p class="font-medium text-olive-deep"><%= source.name %></p>
+                <p class="text-xs text-ink/55 break-all"><%= source.url %></p>
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap"><%= source.enabled? ? "Enabled" : "Disabled" %></td>
+              <td class="px-3 py-3">
+                <%= button_to (source.enabled? ? "Disable" : "Enable"), toggle_admin_feed_source_path(source), method: :post, class: "rounded-md border border-olive/30 px-2.5 py-1 text-xs text-olive hover:bg-parchment" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

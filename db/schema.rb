@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_26_184354) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -38,6 +38,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_26_184354) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["story_id"], name: "index_biblical_analyses_on_story_id", unique: true
+  end
+
+  create_table "editorial_settings", force: :cascade do |t|
+    t.boolean "singleton", default: true, null: false
+    t.integer "focus", default: 0, null: false
+    t.jsonb "gnews_queries", default: [], null: false
+    t.float "min_prophecy_relevance", default: 0.35, null: false
+    t.integer "daily_publish_cap"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["singleton"], name: "index_editorial_settings_on_singleton", unique: true
   end
 
   create_table "feed_sources", force: :cascade do |t|

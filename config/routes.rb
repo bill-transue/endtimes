@@ -13,5 +13,9 @@ Rails.application.routes.draw do
         post :reject
       end
     end
+    resource :settings, only: %i[show update]
+    resources :feed_sources, only: [] do
+      post :toggle, on: :member
+    end
   end
 end

@@ -17,8 +17,9 @@ class StorySelector
 
   TRUSTED = /reuters|associated press|\bap\b|bbc|npr|religion news|christianity today|the guardian|al jazeera/i
 
-  def initialize(client: LlmClient.build, cap: ENV.fetch("DAILY_PUBLISH_CAP", "10").to_i)
+  def initialize(client: LlmClient.build, setting: EditorialSetting.current, cap: setting.effective_daily_publish_cap)
     @client = client
+    @setting = setting
     @cap = cap
   end
 
