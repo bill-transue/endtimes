@@ -63,6 +63,29 @@ class IngestorTest < ActiveSupport::TestCase
     assert gnews_story.gnews?
     assert_equal "Reuters", gnews_story.source_name
   end
+
+  test "gnews searches the queries from the editorial setting" do
+    EditorialSetting.delete_all
+    EditorialSetting.current.update!(gnews_queries_text: "Israel OR Jerusalem\n\"red heifer\"")
+    searched = []
+    stub_request(:get, %r{https://gnews.io/api/v4/search}).to_return do |request|
+      searched << URI.decode_www_form(request.uri.query.to_s).to_h["q"]
+      { status: 200, body: { "articles" => [] }.to_json }
+    end
+
+    News::GnewsAdapter.new(api_key: "test-key").fetch
+
+    assert_equal [ "Israel OR Jerusalem", "\"red heifer\"" ], searched
+  end
+
+  test "gnews defaults to the end-times queries" do
+    EditorialSetting.delete_all
+    queries = News::GnewsAdapter.new(api_key: "test-key").queries
+
+    assert_includes queries, 'Israel OR Jerusalem OR "West Bank" OR Gaza'
+    assert_includes queries, '"third temple" OR Antichrist OR "end times" OR prophecy'
+    assert_equal 5, queries.size
+  end
 end
 
 module ClimateControl

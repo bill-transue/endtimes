@@ -1,28 +1,27 @@
 module News
   class GnewsAdapter
     SEARCH_URL = "https://gnews.io/api/v4/search"
-    QUERIES = [
-      'justice OR refugees OR famine OR "human rights"',
-      "church OR Christianity OR persecution OR clergy",
-      "war OR ceasefire OR peace OR genocide",
-      "corruption OR poverty OR greed OR scandal"
-    ].freeze
 
     Article = Struct.new(:url, :title, :description, :excerpt, :source_name, :image_url, :published_at, :raw, keyword_init: true)
 
-    def initialize(api_key: ENV["NEWS_API_KEY"], fetcher: HttpFetcher.new)
+    def initialize(api_key: ENV["NEWS_API_KEY"], fetcher: HttpFetcher.new, queries: nil)
       @api_key = api_key.to_s
       @fetcher = fetcher
+      @queries = queries
     end
 
     def enabled?
       @api_key.present?
     end
 
+    def queries
+      @queries || EditorialSetting.current.query_list
+    end
+
     def fetch
       return [] unless enabled?
 
-      QUERIES.flat_map { |query| search(query) }.uniq { |article| article.url }
+      queries.flat_map { |query| search(query) }.uniq { |article| article.url }
     end
 
     private

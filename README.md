@@ -20,6 +20,7 @@ Then open [http://127.0.0.1:4317](http://127.0.0.1:4317).
 - Story: `/stories/:id`
 - About: `/about`
 - Admin (HTTP basic): `/admin/stories` — default local user `admin` / `endtimes`
+- Editorial settings: `/admin/settings` — focus (End times leaning / Mix / Broad biblical), GNews queries, minimum prophecy relevance, daily cap, and RSS feed toggles. Saving reshuffles stories still in the queue; published stories are never taken down automatically.
 
 Without `NEWS_API_KEY`, ingest is RSS-only. Without `GEMINI_API_KEY` or `OPENAI_API_KEY`, analyses use a mock client so the UI still works. `db:seed` loads a representative World English Bible index and demo published stories if the feed is empty.
 
@@ -41,7 +42,7 @@ In development, Active Job also runs inline via the async adapter, so `bin/rails
 | `LLM_PROVIDER` | No | `gemini`, `openai`, or `mock` |
 | `LLM_MODEL` | No | Override model id |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Production yes | HTTP basic for `/admin/stories` |
-| `DAILY_PUBLISH_CAP` | No | Max auto-publishes per day (default 10) |
+| `DAILY_PUBLISH_CAP` | No | Max auto-publishes per day (default 10) when the cap in `/admin/settings` is blank |
 | `DATABASE_URL` | Production | Postgres connection string |
 | `RAILS_MASTER_KEY` | Production | Decrypts `config/credentials.yml.enc` |
 | `SECRET_KEY_BASE` | Production | Set automatically on Render via `generateValue` |
