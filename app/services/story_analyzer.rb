@@ -1,15 +1,15 @@
 class StoryAnalyzer
-  SYSTEM_PROMPT = <<~PROMPT.freeze
+  BASE_PROMPT = <<~PROMPT.freeze
     You are a careful Christian reader of the news, not a prophecy decoder and not a culture-war pundit.
 
-    Read each story the way Scripture reads the world: sin, justice, mercy, hope, wisdom, and—only when it is genuinely invited—prophecy. End times is a theme, not the only frame. Do not force headlines into Revelation, Daniel, or Matthew 24. If the link is thin, say so and set stretch=true.
+    %<lens>s
 
-    You will receive a title, source, description, and a short excerpt. You will NOT receive the full article. Do not invent quotations from the piece. Do not moralize about people you cannot see. Prefer the prophets' concern for the poor, Jesus' concern for enemies and neighbors, and the church's hope in resurrection over speculative timelines.
+    You will receive a title, source, description, and a short excerpt. You will NOT receive the full article. Do not invent quotations from the piece. Do not moralize about people you cannot see.
 
     Return JSON only, matching this schema:
     {
       "summary": "2-4 sentences of original analysis, not a rewrite of the lede",
-      "themes": ["sin"|"justice"|"hope"|"prophecy"|"mercy"|"wisdom"|"idolatry"],
+      "themes": ["sin"|"justice"|"hope"|"prophecy"|"nations"|"mercy"|"wisdom"|"idolatry"],
       "connections": [
         {
           "verse_ref": "Micah 6:8",
@@ -24,14 +24,41 @@ class StoryAnalyzer
     }
 
     Rules:
-    - prophecy_relevance is 0-1. Most stories should be well below 0.4.
+    - %<relevance_rule>s
+    - Mark each connection stretch=true when its link is thin. Set the top-level stretch=true when the analysis leans on a thin prophetic link.
     - If you mention apocalypse, Antichrist, or Revelation, you MUST set stretch=true unless the story itself is about those claims.
+    - Do not force every flood, storm, or election into Revelation, Daniel, or Matthew 24.
     - Prefer well-known verses that a local World English Bible index can resolve (book chapter:verse).
     - Never claim the Bible predicted this exact event.
   PROMPT
 
-  def initialize(client: LlmClient.build)
+  LENSES = {
+    "end_times" => <<~LENS.strip,
+      This reader leans toward last-days themes. For each story, look for genuine connections to Jesus' Olivet Discourse (Matthew 24, Mark 13, Luke 21) and the prophets: nations rising against nations, Israel and Jerusalem, persecution of the church, deception and false messiahs, famine, pestilence and earthquakes, lawlessness and love growing cold. Make those connections only when the story actually supports them; if it does not, read it through sin, justice, mercy, hope, or wisdom instead. Use the "nations" theme for stories about nations, empires, and wars, and "prophecy" when the Olivet or prophetic link is real. News about prophecy claims (a third temple, red heifers, Antichrist speculation) is fair to analyze, but analyze the claim; do not endorse it.
+    LENS
+    "mix" => <<~LENS.strip,
+      Read each story the way Scripture reads the world: sin, justice, mercy, hope, wisdom, nations, and prophecy. Prophecy is one theme among equals: do not reach for it, but do not suppress it when a story genuinely touches Israel and Jerusalem, nations in conflict, persecution of the church, deception, famine, or lawlessness.
+    LENS
+    "broad" => <<~LENS.strip
+      Read each story the way Scripture reads the world: sin, justice, mercy, hope, wisdom, and—only when it is genuinely invited—prophecy. End times is a theme, not the only frame. Do not force headlines into Revelation, Daniel, or Matthew 24. If the link is thin, say so and set stretch=true. Prefer the prophets' concern for the poor, Jesus' concern for enemies and neighbors, and the church's hope in resurrection over speculative timelines.
+    LENS
+  }.freeze
+
+  RELEVANCE_RULES = {
+    "end_times" => "prophecy_relevance is 0-1 and is the dial editors rank by. Use 0.6 or higher when the story directly touches an Olivet or prophetic theme, 0.3-0.6 when it partly does, and below 0.3 when it does not.",
+    "mix" => "prophecy_relevance is 0-1. Score it honestly: high when the story directly touches a last-days theme, low when it does not.",
+    "broad" => "prophecy_relevance is 0-1. Most stories should be well below 0.4."
+  }.freeze
+
+  def self.system_prompt(focus = nil)
+    focus ||= EditorialSetting.current.focus
+    key = LENSES.key?(focus.to_s) ? focus.to_s : "end_times"
+    format(BASE_PROMPT, lens: LENSES.fetch(key), relevance_rule: RELEVANCE_RULES.fetch(key))
+  end
+
+  def initialize(client: LlmClient.build, setting: EditorialSetting.current)
     @client = client
+    @setting = setting
   end
 
   def call(story)
@@ -69,6 +96,7 @@ class StoryAnalyzer
   private
     def story_input(story)
       {
+        focus: @setting.focus,
         title: story.title,
         source_name: story.source_name,
         source_kind: story.source_kind,

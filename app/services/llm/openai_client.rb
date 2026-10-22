@@ -5,11 +5,11 @@ module Llm
     DEFAULT_MODEL = "gpt-4o-mini"
 
     def analyze_story(input)
-      request(system: StoryAnalyzer::SYSTEM_PROMPT, user: StoryAnalyzer.user_prompt(input))
+      request(system: StoryAnalyzer.system_prompt(input[:focus]), user: StoryAnalyzer.user_prompt(input))
     end
 
     def select_stories(input)
-      request(system: StorySelector::SYSTEM_PROMPT, user: StorySelector.user_prompt(input))
+      request(system: StorySelector.system_prompt(input[:focus]), user: StorySelector.user_prompt(input))
     end
 
     private
