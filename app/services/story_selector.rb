@@ -55,7 +55,7 @@ class StorySelector
     end
     decisions = enforce_focus(decisions, ranked, remaining)
 
-    apply(decisions)
+    apply(decisions, stories)
     decisions
   end
 
@@ -209,8 +209,8 @@ class StorySelector
       }
     end
 
-    def apply(decisions)
-      allowed = Story.awaiting_selection.pluck(:id)
+    def apply(decisions, stories)
+      allowed = Story.where(id: stories.map(&:id), status: Story::SELECTABLE_STATUSES).pluck(:id)
       Story.where(id: Array(decisions["publish"]).map(&:to_i) & allowed).find_each(&:publish!)
       Story.where(id: Array(decisions["hold"]).map(&:to_i) & allowed).find_each(&:hold!)
       Story.where(id: Array(decisions["reject"]).map(&:to_i) & allowed).find_each(&:reject!)

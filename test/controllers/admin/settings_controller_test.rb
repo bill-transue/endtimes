@@ -29,6 +29,7 @@ class Admin::SettingsControllerTest < ActionDispatch::IntegrationTest
       }
     }
     assert_redirected_to admin_settings_path
+    assert_enqueued_with(job: SelectStoriesJob, args: [ { reshuffle: true } ])
 
     setting = EditorialSetting.current
     assert setting.mix?
@@ -41,6 +42,7 @@ class Admin::SettingsControllerTest < ActionDispatch::IntegrationTest
     patch admin_settings_path, headers: auth_headers, params: { editorial_setting: { min_prophecy_relevance: "2" } }
     assert_response :unprocessable_entity
     assert_in_delta 0.35, EditorialSetting.current.min_prophecy_relevance
+    assert_no_enqueued_jobs only: SelectStoriesJob
   end
 
   test "story queue links to settings" do

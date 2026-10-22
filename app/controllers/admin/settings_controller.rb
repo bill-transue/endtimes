@@ -8,7 +8,8 @@ module Admin
     def update
       @setting = EditorialSetting.current
       if @setting.update(setting_params)
-        redirect_to admin_settings_path, notice: "Saved. Focus is #{@setting.focus_label}."
+        SelectStoriesJob.perform_later(reshuffle: true)
+        redirect_to admin_settings_path, notice: "Saved. Focus is #{@setting.focus_label}; the story queue is being reshuffled."
       else
         @feed_sources = FeedSource.order(:name)
         render :show, status: :unprocessable_entity

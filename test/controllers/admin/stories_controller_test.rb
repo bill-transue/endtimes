@@ -18,6 +18,7 @@ class Admin::StoriesControllerTest < ActionDispatch::IntegrationTest
     post publish_admin_story_path(@story), headers: auth_headers
     assert_redirected_to admin_stories_path
     assert @story.reload.published?
+    assert_equal "published", @story.raw_payload["editor_status"]
 
     post hold_admin_story_path(@story), headers: auth_headers
     assert @story.reload.held?
