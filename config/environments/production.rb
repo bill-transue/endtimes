@@ -1,4 +1,5 @@
 require "active_support/core_ext/integer/time"
+require_relative "../../lib/allowed_hosts"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -80,7 +81,6 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  config.hosts << /.*\.onrender\.com/
-  config.hosts << ENV["RENDER_EXTERNAL_HOSTNAME"] if ENV["RENDER_EXTERNAL_HOSTNAME"].present?
+  config.hosts.concat(AllowedHosts.from_env)
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end
